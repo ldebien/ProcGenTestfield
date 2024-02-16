@@ -12,17 +12,15 @@ RandomWalkCaveGenerator::RandomWalkCaveGenerator()
 
 RandomWalkCaveGenerator::~RandomWalkCaveGenerator()
 {
-    if (cell == nullptr)
+    if (floorCells != nullptr)
     {
-        return;
-    }
+        for (int i = 0; i < MAP_WIDTH; ++i)
+        {
+            if (floorCells[i] != nullptr) delete[] floorCells[i];
+        }
 
-    for (int i = 0; i < MAP_WIDTH; ++i)
-    {
-        if (cell[i] != nullptr) delete[] cell[i];
+        delete[] floorCells;
     }
-
-    delete[] cell;
 
     for (Walker * walker : m_walkers)
     {
@@ -88,10 +86,12 @@ void RandomWalkCaveGenerator::DrawCellMap()
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (cell[x][y])
-            {
-                DrawRectangle(x * CELL_SIZE.x, y * CELL_SIZE.y, CELL_SIZE.x, CELL_SIZE.y, CELL_COLOR);
-            }
+            floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
+
+            // if (cell[x][y])
+            // {
+            //     DrawRectangle(x * CELL_SIZE.x, y * CELL_SIZE.y, CELL_SIZE.x, CELL_SIZE.y, CELL_COLOR);
+            // }
         }
     }
 }
@@ -100,7 +100,7 @@ void RandomWalkCaveGenerator::DrawWalkers()
 {
     for (Walker * walker : m_walkers)
     {
-        DrawRectangle(walker->Pos.x * CELL_SIZE.x, walker->Pos.y * CELL_SIZE.y, CELL_SIZE.x, CELL_SIZE.y, BLUE);
+        DrawRectangle(walker->PosX * CELL_SIZE.x, walker->PosY * CELL_SIZE.y, CELL_SIZE.x, CELL_SIZE.y, BLUE);
     }
 }
 
@@ -119,12 +119,13 @@ void RandomWalkCaveGenerator::DrawCellMap3D()
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (!cell[x][y]) continue;
+            if (!floorCells[x][y].IsFloor()) continue;
 
-            Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
-            Vector3 centerPos = {x - offset.x + 0.5f, pixelColor.r / 32 - offset.y, y - offset.z + 0.5f};
-            //DrawPlane(centerPos, cellSize, GetImageColor(perlinNoiseImage, x, y));
-            DrawCube(centerPos, 1.0f, 1.0f, 1.0f, GetImageColor(floorPerlinNoiseImage, x, y));
+            // Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
+            // Vector3 centerPos = {x - offset.x + 0.5f, pixelColor.r / 32 - offset.y, y - offset.z + 0.5f};
+            // //DrawPlane(centerPos, cellSize, GetImageColor(perlinNoiseImage, x, y));
+            // DrawCube(centerPos, 1.0f, 1.0f, 1.0f, GetImageColor(floorPerlinNoiseImage, x, y));
+            floorCells[x][y].Draw3D(offset);
         }
     }
 }
@@ -134,20 +135,33 @@ void RandomWalkCaveGenerator::DrawWalkers3D()
     Vector3 offset {MAP_WIDTH * 0.5f, 4.0f, MAP_HEIGHT * 0.5f};
     for (Walker * walker : m_walkers)
     {
-        int x = (int)walker->Pos.x;
-        int y = (int)walker->Pos.y;
-        Vector3 walkerPos {walker->Pos.x - offset.x + 0.5f , GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.75f, walker->Pos.y - offset.z + 0.5f};
+        int x = walker->PosX;
+        int y = walker->PosY;
+        Vector3 walkerPos {x - offset.x + 0.5f , GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.75f, y - offset.z + 0.5f};
         DrawCube(walkerPos, 0.5f, 0.5f, 0.5f, GOLD);
     }
 }
 
 void RandomWalkCaveGenerator::Init()
 {
-    cell = new bool*[MAP_WIDTH];
+    int total = 0;
+    std::cout << "Number of values to initialize: " << MAP_WIDTH * MAP_HEIGHT << std::endl;
+    floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 4.0f);
+
+    floorCells = new Cell*[MAP_WIDTH];
 	for(int x = 0; x < MAP_WIDTH; ++x)
     {
-        cell[x] = new bool[MAP_HEIGHT] { false };
+        floorCells[x] = new Cell[MAP_HEIGHT] {};
+        for (int y = 0; y < MAP_HEIGHT; ++y)
+        {
+            Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
+            Vector3 pos { x + 0.5f, pixelColor.r / 32, y + 0.5f };
+            floorCells[x][y].Init(pos, false, pixelColor);
+            total++;
+        }
     }
+
+    std::cout << "-> " << total << " values initialized." << std::endl;
 }
 
 void RandomWalkCaveGenerator::GenerateOneStep()
@@ -159,8 +173,9 @@ void RandomWalkCaveGenerator::GenerateOneStep()
             continue;
         }
 
-        Vector2 newPos = {0.0f, 0.0f};
-        while ((newPos.x == 0.0f && newPos.y == 0.0f) || newPos.x < 0 || newPos.x >= MAP_WIDTH || newPos.y < 0 || newPos.y >= MAP_HEIGHT)
+        int moveX = 0;
+        int moveY = 0;
+        while ((moveX == 0.0f && moveY == 0.0f) || moveX < 0 || moveX >= MAP_WIDTH || moveY < 0 || moveY >= MAP_HEIGHT)
         {
             // with diagonales
             // newPos.x = walker->Pos.x + GetRandomValue(-1, 1);
@@ -171,27 +186,28 @@ void RandomWalkCaveGenerator::GenerateOneStep()
             switch(dir)
             {
                 case 0: // Right
-                    newPos = {1.0f, 0.0f};
+                    moveX = 1;
                     break;
                 case 1: // Up
-                    newPos = {0.0f, -1.0f};
+                    moveY = -1;
                     break;
                 case 2: // Left
-                    newPos = {-1.0f, 0.0f};
+                    moveX = -1;
                     break;
                 case 3: // Down
-                    newPos = {0.0f, 1.0f};
+                    moveY = 1;
                     break;
                 default:
                     break;
             }
-            newPos = Vector2Add(walker->Pos, newPos);
         }
 
-        walker->Pos = newPos;
+        walker->PosX += moveX;
+        walker->PosY += moveY;
         walker->StepsLeft--;
 
-        cell[static_cast<int>(walker->Pos.x)][static_cast<int>(walker->Pos.y)] = true;
+        floorCells[walker->PosX][walker->PosY].IsFloor();
+        floorCells[walker->PosX][walker->PosY].SetFloorState(true);
     }
 
     PostStepCheck();
@@ -202,12 +218,11 @@ void RandomWalkCaveGenerator::SpawnWalker()
     // Random points at least 30% distance from map borders
     int randomX = GetRandomValue(MAP_WIDTH * 0.3f, MAP_WIDTH * 0.7f);
     int randomY = GetRandomValue(MAP_HEIGHT * 0.3f, MAP_HEIGHT * 0.7f);
-    Vector2 walkerPos = {static_cast<float>(randomX), static_cast<float>(randomY)};
 
-    Walker * newWalker = new Walker {walkerPos, STEPS_PER_WALKER};
+    Walker * newWalker = new Walker {randomX, randomY, STEPS_PER_WALKER};
     m_walkers.push_back(newWalker);
 
-    cell[randomX][randomY] = true;
+    floorCells[randomX][randomY].SetFloorState(true);
 }
 
 void RandomWalkCaveGenerator::PostStepCheck()
@@ -247,13 +262,13 @@ void RandomWalkCaveGenerator::OptimizeFloor()
         floorFound = false;
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (!floorFound && cell[x][y])
+            if (!floorFound && floorCells[x][y].IsFloor())
             {
                 floorFound = true;
                 if (y < minY) minY = y;
             }
 
-            if (cell[x][y] && y > maxY) maxY = y;
+            if (floorCells[x][y].IsFloor() && y > maxY) maxY = y;
         }
 
         if (floorFound)

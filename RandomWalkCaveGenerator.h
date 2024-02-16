@@ -3,9 +3,12 @@
 #include <vector>
 #include "raylib.h"
 
+#include "Cell.h"
+
 struct Walker
 {
-    Vector2 Pos {};
+    int PosX {};
+    int PosY {};
     int StepsLeft {};
 };
 
@@ -53,7 +56,9 @@ private:
     int minX, maxX {};
     int minY, maxY {};
 
-    bool **cell;
+    Cell **floorCells;
+
+    //bool **cell;
     Vector3 **cellPos;
     Image floorPerlinNoiseImage {};
 
