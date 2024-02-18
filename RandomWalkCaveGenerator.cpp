@@ -333,13 +333,12 @@ void RandomWalkCaveGenerator::DrawOptimizedMapBoundaries()
 
 void RandomWalkCaveGenerator::DrawCellMap3D()
 {
-    Vector3 offset {MAP_WIDTH * 0.5f, 4.0f, MAP_HEIGHT * 0.5f};
-    floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 4.0f);
+    Vector3 offset {MAP_WIDTH * -0.5f, 0.0f, MAP_HEIGHT * -0.5f};
     for (int x = 0; x < MAP_WIDTH; ++x)
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (floorCells[x][y].GetCellType() == ECellType::Wall) continue;
+            if (floorCells[x][y].GetCellType() == ECellType::Empty) continue;
 
             floorCells[x][y].Draw3D(offset);
         }
@@ -348,12 +347,12 @@ void RandomWalkCaveGenerator::DrawCellMap3D()
 
 void RandomWalkCaveGenerator::DrawWalkers3D()
 {
-    Vector3 offset {MAP_WIDTH * 0.5f, 4.0f, MAP_HEIGHT * 0.5f};
+    Vector3 offset {MAP_WIDTH * -0.5f, 0.0f, MAP_HEIGHT * -0.5f};
     for (Walker * walker : m_walkers)
     {
         int x = walker->PosX;
         int y = walker->PosY;
-        Vector3 walkerPos {x - offset.x + 0.5f , GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.75f, y - offset.z + 0.5f};
+        Vector3 walkerPos {x + offset.x + 0.5f , GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.75f, y + offset.z + 0.5f};
         DrawCube(walkerPos, 0.5f, 0.5f, 0.5f, GOLD);
     }
 }

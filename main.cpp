@@ -19,7 +19,7 @@ int main()
     camera.fovy = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
 
-    //DisableCursor();
+    DisableCursor();
 
     //CellularAutomata cellularAutomataMap = CellularAutomata();
     //     for (int i = 0; i < 4; ++i)
@@ -31,16 +31,16 @@ int main()
     //         cellularAutomataMap.DoSimulationStep(false);
     //     }
     RandomWalkCaveGenerator randomWalkMap = RandomWalkCaveGenerator();
-    //randomWalkMap.FullyGenerateMap();
-    randomWalkMap.PrepareMapGeneration();
+    randomWalkMap.FullyGenerateMap();
+    //randomWalkMap.PrepareMapGeneration();
 
     bool started {false};
 
-    SetTargetFPS(144);
+    SetTargetFPS(60);
     while (!WindowShouldClose())
     {
         // Update
-        //UpdateCamera(&camera, CAMERA_FREE);
+        UpdateCamera(&camera, CAMERA_FREE);
 
         if (IsKeyPressed(KEY_F5))
             started = true;
@@ -91,18 +91,18 @@ int main()
 
         // Draw
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground(DARKBLUE);
 
-            //BeginMode3D(camera);
-                    // randomWalkMap.DrawCellMap3D();
-                    // randomWalkMap.DrawWalkers3D();
+            BeginMode3D(camera);
+                    randomWalkMap.DrawCellMap3D();
+                    randomWalkMap.DrawWalkers3D();
 
                     //DrawGrid(1300, 1.0f);
-            //EndMode3D();
+            EndMode3D();
 
             //cellularAutomataMap.DrawCellMap();
-            randomWalkMap.DrawCellMap();
-            randomWalkMap.DrawWalkers();
+            // randomWalkMap.DrawCellMap();
+            // randomWalkMap.DrawWalkers();
 
             // if (randomWalkMap.IsFinished())
             // {

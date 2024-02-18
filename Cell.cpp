@@ -52,9 +52,17 @@ void Cell::SetCornerPos(ECorner p_corner, Vector3 p_pos)
 
 const void Cell::Draw3D(Vector3 p_offset)
 {
-    Vector3 pos = Vector3Add(properties->centerPos, p_offset); 
+    Vector3 size = Vector3One();
+    //Color color = WHITE;
+    if (properties->type == ECellType::Wall)
+    {
+        p_offset.y += 3.0f;
+        size.y = 6.0f;
+        //color = DARKBROWN;
+    }
 
-    DrawCube(pos, 1.0f, 1.0f, 1.0f, WHITE);
+    Vector3 pos = Vector3Add(properties->centerPos, p_offset);
+    DrawCubeV(pos, size, color);
 }
 
 const void Cell::Draw2D(Vector2 p_offset, int p_cellWidth, int p_cellHeight)
