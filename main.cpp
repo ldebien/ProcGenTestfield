@@ -91,7 +91,7 @@ int main()
 
         // Draw
         BeginDrawing();
-        ClearBackground(DARKBROWN);
+        ClearBackground(BLACK);
 
             //BeginMode3D(camera);
                     // randomWalkMap.DrawCellMap3D();
@@ -103,9 +103,6 @@ int main()
             //cellularAutomataMap.DrawCellMap();
             randomWalkMap.DrawCellMap();
             randomWalkMap.DrawWalkers();
-
-            if (randomWalkMap.IsFinished())
-                randomWalkMap.DrawOptimizedMapBoundaries();
 
             DrawFPS(5, 5);
 

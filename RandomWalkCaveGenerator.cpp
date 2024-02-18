@@ -248,34 +248,27 @@ void RandomWalkCaveGenerator::OptimizeFloor()
     optimizedWidth = maxX - minX;
     optimizedHeight = maxY - minY;
 
-    for (int x = minX; x < optimizedWidth; ++x)
+    for (int x = 0; x < MAP_WIDTH; ++x)
     {
-        for (int y = minY; y < optimizedHeight; ++y)
+        for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (!floorCells[x][y].GetFloorState())
-                floorCells[x][y].SetColor(BLACK);
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY && !floorCells[x][y].GetFloorState())
+                floorCells[x][y].SetColor(DARKBROWN);
+            else
+                floorCells[x][y].SetColor(BLANK);
         }
     }
 }
 
 void RandomWalkCaveGenerator::DrawCellMap()
 {
-    if (optimizedHeight > 0 && optimizedWidth > 0)
-    {
-        for (int x = minX; x < optimizedWidth; ++x)
-        {
-            for (int y = minY; y < optimizedHeight; ++y)
-            {
-                floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
-            }
-        }
-    }
-
     for (int x = 0; x < MAP_WIDTH; ++x)
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (floorCells[x][y].GetFloorState()) // draw only floor tiles
+            if (optimizedHeight > 0 && optimizedWidth > 0)
+                floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
+            else if (floorCells[x][y].GetFloorState()) // draw only floor tiles
                 floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
         }
     }

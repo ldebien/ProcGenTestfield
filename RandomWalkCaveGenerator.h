@@ -51,7 +51,7 @@ private:
     const Color CELL_COLOR {WHITE}; // for non-wall cell
     const int WALKER_NB = 10;
     const int STEPS_PER_WALKER = 600;
-    const int DELAY_BETWEEN_SPAWN = 233; // in steps
+    const int DELAY_BETWEEN_SPAWN = 0; // in steps
 
     int optimizedWidth {-1};
     int optimizedHeight {-1};
