@@ -108,10 +108,15 @@ void RandomWalkCaveGenerator::GenerateOneStep()
             continue;
         }
 
-        int moveX = 0;
-        int moveY = 0;
-        while ((moveX == 0.0f && moveY == 0.0f) || moveX < 0 || moveX >= MAP_WIDTH || moveY < 0 || moveY >= MAP_HEIGHT)
+        int moveX {};
+        int moveY {};
+        int tries = 10;
+        while ((moveX == 0.0f && moveY == 0.0f) || 
+                moveX < 1 || moveX >= MAP_WIDTH - 1 || 
+                moveY < 1 || moveY >= MAP_HEIGHT - 1)
         {
+            moveX = 0;
+            moveY = 0;
             // with diagonales
             // newPos.x = walker->Pos.x + GetRandomValue(-1, 1);
             // newPos.y = walker->Pos.y + GetRandomValue(-1, 1);
@@ -139,6 +144,14 @@ void RandomWalkCaveGenerator::GenerateOneStep()
 
             moveX += walker->PosX;
             moveY += walker->PosY;
+
+            tries--;
+            if (tries <= 0)
+            {
+                std::cout << "Walker move failed. Last move candidate from " << walker->PosX << ":" << walker->PosY << " to " << moveX << ":" << moveY << std::endl;
+                walker->StepsLeft = 0;
+                return;
+            }
         }
 
         walker->PosX = moveX;

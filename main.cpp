@@ -49,7 +49,7 @@ int main()
         {
             randomWalkMap.~RandomWalkCaveGenerator();
             new (&randomWalkMap) RandomWalkCaveGenerator();
-            randomWalkMap.FullyGenerateMap();
+            randomWalkMap.PrepareMapGeneration();
         }
 
         // if (IsKeyPressed(KEY_F9))
@@ -103,7 +103,9 @@ int main()
             //cellularAutomataMap.DrawCellMap();
             randomWalkMap.DrawCellMap();
             randomWalkMap.DrawWalkers();
-            //randomWalkMap.DrawOptimizedMapBoundaries();
+
+            if (randomWalkMap.IsFinished())
+                randomWalkMap.DrawOptimizedMapBoundaries();
 
             DrawFPS(5, 5);
 
