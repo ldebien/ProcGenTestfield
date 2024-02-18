@@ -32,7 +32,7 @@ RandomWalkCaveGenerator::~RandomWalkCaveGenerator()
 void RandomWalkCaveGenerator::Init()
 {
     int total = 0;
-    floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 4.0f);
+    floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 6.0f);
 
     floorCells = new Cell*[MAP_WIDTH] {};
 	for(int x = 0; x < MAP_WIDTH; ++x)
@@ -42,7 +42,7 @@ void RandomWalkCaveGenerator::Init()
         {
             Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
             Vector3 pos { x + 0.5f, pixelColor.r / 32, y + 0.5f };
-            floorCells[x][y].Init(pos, false, pixelColor);
+            floorCells[x][y].Init(pos);
             total++;
         }
     }
@@ -96,7 +96,7 @@ void RandomWalkCaveGenerator::FullyGenerateMap()
         finished = done;
     }
 
-    OptimizeFloor();
+    OptimizeFloorCells();
 }
 
 void RandomWalkCaveGenerator::GenerateOneStep()
@@ -160,7 +160,8 @@ void RandomWalkCaveGenerator::GenerateOneStep()
         walker->RecordedYPos.push_back(moveY); 
         walker->StepsLeft--;
 
-        floorCells[walker->PosX][walker->PosY].SetFloorState(true);
+        floorCells[moveX][moveY].SetFloorType();
+        floorCells[moveX][moveY].SetColor(GetImageColor(floorPerlinNoiseImage, moveX, moveY));
     }
 
     PostStepCheck();
@@ -177,7 +178,7 @@ void RandomWalkCaveGenerator::SpawnWalker()
     newWalker->RecordedYPos.push_back(randomY);
     m_walkers.push_back(newWalker);
 
-    floorCells[randomX][randomY].SetFloorState(true);
+    floorCells[randomX][randomY].SetFloorType();
 }
 
 void RandomWalkCaveGenerator::PostStepCheck()
@@ -203,13 +204,13 @@ void RandomWalkCaveGenerator::PostStepCheck()
 
     if (finished)
     {
-        OptimizeFloor();
+        OptimizeFloorCells();
     }
 }
 
 /// @brief Optimize the number of cells
 /// @details Removes outer wall cells to reduce width and height of cells array
-void RandomWalkCaveGenerator::OptimizeFloor()
+void RandomWalkCaveGenerator::OptimizeFloorCells()
 {
     minX = MAP_WIDTH;
     maxX = 0;
@@ -222,13 +223,13 @@ void RandomWalkCaveGenerator::OptimizeFloor()
         floorFound = false;
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (!floorFound && floorCells[x][y].GetFloorState())
+            if (!floorFound && floorCells[x][y].GetCellType() == ECellType::Floor)
             {
                 floorFound = true;
                 if (y < minY) minY = y;
             }
 
-            if (floorCells[x][y].GetFloorState() && y > maxY) maxY = y;
+            if (floorCells[x][y].GetCellType() == ECellType::Floor && y > maxY) maxY = y;
         }
 
         if (floorFound)
@@ -241,23 +242,62 @@ void RandomWalkCaveGenerator::OptimizeFloor()
     // Add 1 cell border around map edges
     // to make sure there is at least a wall on map edges
     if (minX > 0)               minX--;
-    if (maxX < MAP_WIDTH - 2)   maxX++;
+    if (maxX < MAP_WIDTH - 1)   maxX++;
     if (minY > 0)               minY--;
-    if (maxY < MAP_HEIGHT - 2)  maxY++;
+    if (maxY < MAP_HEIGHT - 1)  maxY++;
 
     optimizedWidth = maxX - minX;
     optimizedHeight = maxY - minY;
 
+    // Set Walls & Colors
     for (int x = 0; x < MAP_WIDTH; ++x)
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (x >= minX && x <= maxX && y >= minY && y <= maxY && !floorCells[x][y].GetFloorState())
-                floorCells[x][y].SetColor(DARKBROWN);
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY)
+            {
+                if (floorCells[x][y].GetCellType() == ECellType::Empty)
+                {
+                    if (HasFloorNeighbours(x, y))
+                    {
+                        floorCells[x][y].SetWallType();
+                        floorCells[x][y].SetColor(DARKBROWN);
+                    }
+                    else
+                    {
+                        floorCells[x][y].SetColor(BLANK);
+                    }
+                }
+            }
             else
+            {
                 floorCells[x][y].SetColor(BLANK);
+            }
         }
     }
+}
+
+const bool RandomWalkCaveGenerator::HasFloorNeighbours(const int x, const int y)
+{
+	for(int i = -1; i < 2; ++i)
+    {
+		for(int j = -1; j < 2; ++j)
+        {
+			int neighbourX = x + i;
+			int neighbourY = y + j;
+			if(i == 0 && j == 0 ||
+                (neighbourX < 0 || neighbourY < 0 || neighbourX >= MAP_WIDTH || neighbourY >= MAP_HEIGHT))
+            {
+                continue;
+			}
+			else if(floorCells[neighbourX][neighbourY].GetCellType() == ECellType::Floor)
+            {
+				return true;
+			}
+		}
+	}
+
+    return false;
 }
 
 void RandomWalkCaveGenerator::DrawCellMap()
@@ -266,10 +306,12 @@ void RandomWalkCaveGenerator::DrawCellMap()
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (optimizedHeight > 0 && optimizedWidth > 0)
+            // if (optimizedHeight > 0 && optimizedWidth > 0 && (floorCells[x][y].GetCellType() == ECellType::Floor || floorCells[x][y].GetCellType() == ECellType::Wall))
+            //     floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
+            // else if (floorCells[x][y].GetCellType() == ECellType::Floor) // draw only floor tiles
                 floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
-            else if (floorCells[x][y].GetFloorState()) // draw only floor tiles
-                floorCells[x][y].Draw2D(Vector2Zero(), CELL_SIZE.x, CELL_SIZE.y);
+            
+            //DrawRectangleLines(x * CELL_SIZE.x, y * CELL_SIZE.y, CELL_SIZE.x, CELL_SIZE.y, DARKPURPLE);
         }
     }
 }
@@ -286,7 +328,7 @@ void RandomWalkCaveGenerator::DrawOptimizedMapBoundaries()
 {
     Color debugColor = GREEN;
     debugColor.a = (unsigned char)64;
-    DrawRectangle(minX * 10.0f, minY * 10.0f, (optimizedWidth + 1) * 10.0f, (optimizedHeight + 1) * 10.0f, debugColor);
+    DrawRectangle(minX * 10.0f, minY * 10.0f, optimizedWidth * 10.0f, optimizedHeight * 10.0f, debugColor);
 }
 
 void RandomWalkCaveGenerator::DrawCellMap3D()
@@ -297,7 +339,7 @@ void RandomWalkCaveGenerator::DrawCellMap3D()
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (!floorCells[x][y].GetFloorState()) continue;
+            if (floorCells[x][y].GetCellType() == ECellType::Wall) continue;
 
             floorCells[x][y].Draw3D(offset);
         }

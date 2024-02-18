@@ -1,13 +1,12 @@
 #include "Cell.h"
 
-
 #include "raymath.h"
 
 Cell::Cell()
 {
     properties = new CellProperties
     {
-        false,
+        ECellType::Empty,
         Vector3Zero(),
         {
             {ECorner::TopRight, Vector3Zero()},
@@ -23,10 +22,8 @@ Cell::~Cell()
     if (properties != nullptr) delete properties;
 }
 
-void Cell::Init(Vector3 p_pos, bool p_floorState, Color p_color)
+void Cell::Init(Vector3 p_pos)
 {
-    properties->isFloor = p_floorState;
-
     // Flat floor/tile
     properties->centerPos = p_pos;
     properties->cornerPos =
@@ -37,7 +34,7 @@ void Cell::Init(Vector3 p_pos, bool p_floorState, Color p_color)
         {ECorner::BotLeft, p_pos}
     };
 
-    color = p_color;
+    color = BLANK;
 }
 
 void Cell::SetCornersPos(std::map<ECorner, Vector3> p_cornerPos)

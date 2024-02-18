@@ -104,6 +104,11 @@ int main()
             randomWalkMap.DrawCellMap();
             randomWalkMap.DrawWalkers();
 
+            // if (randomWalkMap.IsFinished())
+            // {
+            //     randomWalkMap.DrawOptimizedMapBoundaries();
+            // }
+
             DrawFPS(5, 5);
 
         EndDrawing();

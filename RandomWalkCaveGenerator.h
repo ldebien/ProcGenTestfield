@@ -43,7 +43,8 @@ private:
     void GenerateFloor();
     void SpawnWalker();
     void PostStepCheck();
-    void OptimizeFloor();
+    void OptimizeFloorCells();
+    const bool HasFloorNeighbours(const int x, const int y);
 
     const int MAP_WIDTH {128};
     const int MAP_HEIGHT {72};
