@@ -10,6 +10,8 @@ struct Walker
     int PosX {};
     int PosY {};
     int StepsLeft {};
+    std::vector<int> RecordedXPos {};
+    std::vector<int> RecordedYPos {};
 };
 
 class RandomWalkCaveGenerator
@@ -26,7 +28,7 @@ public:
     const int GetMaxY()             { return maxY; }
     const bool IsFinished()         { return finished; };
     
-    void GenerateMap();
+    void PrepareMapGeneration();
     void GenerateOneStep();
     void FullyGenerateMap();
 
@@ -51,8 +53,8 @@ private:
     const int STEPS_PER_WALKER = 600;
     const int DELAY_BETWEEN_SPAWN = 233; // in steps
 
-    int optimizedWidth {};
-    int optimizedHeight {};
+    int optimizedWidth {-1};
+    int optimizedHeight {-1};
     int minX, maxX {};
     int minY, maxY {};
 

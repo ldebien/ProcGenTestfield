@@ -31,18 +31,19 @@ int main()
     //         cellularAutomataMap.DoSimulationStep(false);
     //     }
     RandomWalkCaveGenerator randomWalkMap = RandomWalkCaveGenerator();
-    randomWalkMap.FullyGenerateMap();
+    //randomWalkMap.FullyGenerateMap();
+    randomWalkMap.PrepareMapGeneration();
 
     bool started {false};
 
-    SetTargetFPS(60);
+    SetTargetFPS(144);
     while (!WindowShouldClose())
     {
         // Update
         //UpdateCamera(&camera, CAMERA_FREE);
 
-        // if (IsKeyPressed(KEY_F5))
-        //     started = true;
+        if (IsKeyPressed(KEY_F5))
+            started = true;
 
         if (IsKeyPressed(KEY_F9))
         {
@@ -55,7 +56,7 @@ int main()
         // {
         //     randomWalkMap.~RandomWalkCaveGenerator();
         //     new (&randomWalkMap) RandomWalkCaveGenerator();
-        //     randomWalkMap.GenerateMap();
+        //     randomWalkMap.PrepareMapGeneration();
         // }
                 
         // if (IsKeyPressed(KEY_F9))
@@ -102,7 +103,9 @@ int main()
             //cellularAutomataMap.DrawCellMap();
             randomWalkMap.DrawCellMap();
             randomWalkMap.DrawWalkers();
-            randomWalkMap.DrawOptimizedMapBoundaries();
+            //randomWalkMap.DrawOptimizedMapBoundaries();
+
+            DrawFPS(5, 5);
 
         EndDrawing();
     }

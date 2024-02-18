@@ -25,18 +25,18 @@ public:
     Cell();
     ~Cell();
 
-    const Vector3 GetPos()      { return properties->centerPos; }
-    const Vector2 GetPos2D()    { return Vector2 { properties->centerPos.x, properties->centerPos.y }; }
-    const bool IsFloor()        { return properties->isFloor; }
+    const Vector3 GetPos()              { return properties->centerPos; }
+    const Vector2 GetPos2D()            { return Vector2 { properties->centerPos.x, properties->centerPos.z }; }
 
-    void SetFloorState(bool p_state) { properties->isFloor = p_state; }
+    const bool GetFloorState()          { return properties->isFloor; }
+    void SetFloorState(bool p_state)    { properties->isFloor = p_state; }
+    void SetColor(Color p_newColor)     { color = p_newColor; }
 
     void Init(Vector3 p_pos, bool p_floorState, Color p_color);
+    void SetCornersPos(std::map<ECorner, Vector3> p_cornerPos);
 
     const void Draw3D(Vector3 p_offset);
     const void Draw2D(Vector2 p_offset, int p_cellWidth, int p_cellHeight);
-
-    void SetCornersPos(std::map<ECorner, Vector3> p_cornerPos);
 
 private:
     CellProperties *properties {};
