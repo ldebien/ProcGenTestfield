@@ -4,12 +4,16 @@
 
 #include "raylib.h"
 
-enum ECorner
+enum ECellVertice
 {
-    TopRight    = 0,
-    TopLeft     = 1,
-    BotLeft     = 2,
-    BotRight    = 3
+    Right       = 0,
+    TopRight    = 1,
+    Top         = 2,
+    TopLeft     = 3,
+    Left        = 4,
+    BotLeft     = 5,
+    Bot         = 6,
+    BotRight    = 7
 };
 
 enum ECellType
@@ -23,7 +27,7 @@ struct CellProperties
 {
     ECellType type { ECellType::Empty };
     Vector3 centerPos {};
-    std::map<ECorner, Vector3> cornerPos {};
+    std::map<ECellVertice, Vector3> cornerPos {};
 };
 
 class Cell
@@ -43,7 +47,7 @@ public:
     void SetColor(Color p_newColor)                         { color = p_newColor; }
 
     void Init(Vector3 p_pos);
-    void SetCornersPos(std::map<ECorner, Vector3> p_cornerPos);
+    void SetCornersPosY(std::map<ECellVertice, float> p_cornerPos);
 
     const void Draw3D(Vector3 p_offset);
     const void Draw2D(Vector2 p_offset, int p_cellWidth, int p_cellHeight);
@@ -53,5 +57,5 @@ private:
     Color color {};
 
     void SetType(ECellType p_type)                           { properties->type = p_type; }
-    void SetCornerPos(ECorner p_corner, Vector3 p_pos);
+    void SetCornerPosY(ECellVertice p_corner, float p_posY);
 };

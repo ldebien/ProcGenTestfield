@@ -45,6 +45,7 @@ private:
     void PostStepCheck();
     void OptimizeFloorCells();
     const bool HasFloorNeighbours(const int x, const int y);
+    const std::map<ECellVertice, float> GetNeighboursPosY(const int x, const int y);
 
     const int MAP_WIDTH {128};
     const int MAP_HEIGHT {72};
