@@ -51,8 +51,8 @@ private:
     const int MAP_HEIGHT {72};
     const Vector2 CELL_SIZE {10.0f, 10.0f};
     const Color CELL_COLOR {WHITE}; // for non-wall cell
-    const int WALKER_NB = 10;
-    const int STEPS_PER_WALKER = 600;
+    const int WALKER_NB = 1; // 10
+    const int STEPS_PER_WALKER = 2; // 600
     const int DELAY_BETWEEN_SPAWN = 0; // in steps
 
     int optimizedWidth {-1};

@@ -31,7 +31,6 @@ RandomWalkCaveGenerator::~RandomWalkCaveGenerator()
 
 void RandomWalkCaveGenerator::Init()
 {
-    int total = 0;
     floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 6.0f);
 
     floorCells = new Cell*[MAP_WIDTH] {};
@@ -41,9 +40,9 @@ void RandomWalkCaveGenerator::Init()
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
             Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
-            Vector3 pos { x + 0.5f, pixelColor.r / 32, y + 0.5f };
+            //Vector3 pos { x + 0.5f, pixelColor.r / 32, y + 0.5f };
+            Vector3 pos { x, pixelColor.r / 32, y };
             floorCells[x][y].Init(pos);
-            total++;
         }
     }
 }
@@ -160,8 +159,11 @@ void RandomWalkCaveGenerator::GenerateOneStep()
         walker->RecordedYPos.push_back(moveY); 
         walker->StepsLeft--;
 
-        floorCells[moveX][moveY].SetFloorType();
-        floorCells[moveX][moveY].SetColor(GetImageColor(floorPerlinNoiseImage, moveX, moveY));
+        if (floorCells[moveX][moveY].GetCellType() != ECellType::Floor)
+        {
+            floorCells[moveX][moveY].SetColor(GetImageColor(floorPerlinNoiseImage, moveX, moveY));
+            floorCells[moveX][moveY].SetFloorType();
+        }
     }
 
     PostStepCheck();
@@ -260,17 +262,7 @@ void RandomWalkCaveGenerator::OptimizeFloorCells()
                 auto neighboursPosY = GetNeighboursPosY(x, y);
 
                 std::map<ECellVertice, float> newCornerPosY {};
-                // Méthode 1 - OK
-                // newCornerPosY[ECellVertice::Right] =    (neighboursPosY[ECellVertice::Right]    + centerPosY) / 2.0f;
-                // newCornerPosY[ECellVertice::TopRight] = (neighboursPosY[ECellVertice::Right]    + neighboursPosY[ECellVertice::TopRight]    + neighboursPosY[ECellVertice::Top]         + centerPosY) / 4.0f;
-                // newCornerPosY[ECellVertice::Top] =      (neighboursPosY[ECellVertice::Top]      + centerPosY) / 2.0f;
-                // newCornerPosY[ECellVertice::TopLeft] =  (neighboursPosY[ECellVertice::Top]      + neighboursPosY[ECellVertice::TopLeft]     + neighboursPosY[ECellVertice::Left]        + centerPosY) / 4.0f;
-                // newCornerPosY[ECellVertice::Left] =     (neighboursPosY[ECellVertice::Left]     + centerPosY) / 2.0f;
-                // newCornerPosY[ECellVertice::BotLeft] =  (neighboursPosY[ECellVertice::Left]     + neighboursPosY[ECellVertice::BotLeft]     + neighboursPosY[ECellVertice::Bot]         + centerPosY) / 4.0f;
-                // newCornerPosY[ECellVertice::Bot] =      (neighboursPosY[ECellVertice::Bot]      + centerPosY) / 2.0f;
-                // newCornerPosY[ECellVertice::BotRight] = (neighboursPosY[ECellVertice::Bot]      + neighboursPosY[ECellVertice::BotRight]    + neighboursPosY[ECellVertice::Right]       + centerPosY) / 4.0f;
 
-                // Méthode 2 - Ok
                 newCornerPosY[ECellVertice::TopRight]   =   (neighboursPosY[ECellVertice::Right]    +   neighboursPosY[ECellVertice::TopRight]    + neighboursPosY[ECellVertice::Top]         + centerPosY) / 4.0f;
                 newCornerPosY[ECellVertice::TopLeft]    =   (neighboursPosY[ECellVertice::Top]      +   neighboursPosY[ECellVertice::TopLeft]     + neighboursPosY[ECellVertice::Left]        + centerPosY) / 4.0f;
                 newCornerPosY[ECellVertice::BotLeft]    =   (neighboursPosY[ECellVertice::Left]     +   neighboursPosY[ECellVertice::BotLeft]     + neighboursPosY[ECellVertice::Bot]         + centerPosY) / 4.0f;
@@ -282,8 +274,6 @@ void RandomWalkCaveGenerator::OptimizeFloorCells()
                 newCornerPosY[ECellVertice::Bot]        =   (newCornerPosY[ECellVertice::BotLeft]   +   newCornerPosY[ECellVertice::BotRight])  /   2.0f;
 
                 floorCells[x][y].SetCornersPosY(newCornerPosY);
-
-
             }
         }
     }
@@ -410,7 +400,7 @@ void RandomWalkCaveGenerator::DrawCellMap3D()
     {
         for (int y = 0; y < MAP_HEIGHT; ++y)
         {
-            if (floorCells[x][y].GetCellType() == ECellType::Empty) continue;
+            if (floorCells[x][y].GetCellType() != ECellType::Floor) continue;
 
             floorCells[x][y].Draw3D(offset);
         }
@@ -424,7 +414,7 @@ void RandomWalkCaveGenerator::DrawWalkers3D()
     {
         int x = walker->PosX;
         int y = walker->PosY;
-        Vector3 walkerPos {x + offset.x + 0.5f , GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.75f, y + offset.z + 0.5f};
+        Vector3 walkerPos {x + offset.x, GetImageColor(floorPerlinNoiseImage, x, y).r / 32 - offset.y + 0.25f, y + offset.z};
         DrawCube(walkerPos, 0.5f, 0.5f, 0.5f, GOLD);
     }
 }

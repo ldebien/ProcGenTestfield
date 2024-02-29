@@ -4,6 +4,7 @@
 
 #include "CellularAutomata.h"
 #include "RandomWalkCaveGenerator.h"
+#include <raymath.h>
 
 int main()
 {
@@ -20,19 +21,10 @@ int main()
     camera.projection = CAMERA_PERSPECTIVE;
 
     DisableCursor();
-
-    //CellularAutomata cellularAutomataMap = CellularAutomata();
-    //     for (int i = 0; i < 4; ++i)
-    //     {
-    //         cellularAutomataMap.DoSimulationStep(true);
-    //     }
-    //     for (int i = 0; i < 3; ++i)
-    //     {
-    //         cellularAutomataMap.DoSimulationStep(false);
-    //     }
+    
     RandomWalkCaveGenerator randomWalkMap = RandomWalkCaveGenerator();
-    randomWalkMap.FullyGenerateMap();
-    //randomWalkMap.PrepareMapGeneration();
+    //randomWalkMap.FullyGenerateMap();
+    randomWalkMap.PrepareMapGeneration(); 
 
     bool started {false};
 
@@ -50,41 +42,8 @@ int main()
             randomWalkMap.~RandomWalkCaveGenerator();
             new (&randomWalkMap) RandomWalkCaveGenerator();
             randomWalkMap.PrepareMapGeneration();
+            started = false;
         }
-
-        // if (IsKeyPressed(KEY_F9))
-        // {
-        //     randomWalkMap.~RandomWalkCaveGenerator();
-        //     new (&randomWalkMap) RandomWalkCaveGenerator();
-        //     randomWalkMap.PrepareMapGeneration();
-        // }
-                
-        // if (IsKeyPressed(KEY_F9))
-        // {
-        //     cellularAutomataMap.~CellularAutomata();
-        //     new (&cellularAutomataMap) CellularAutomata();
-        // }
-        // if (IsKeyPressed(KEY_F10))
-        // {
-        //     cellularAutomataMap.~CellularAutomata();
-        //     new (&cellularAutomataMap) CellularAutomata();
-        //     for (int i = 0; i < 4; ++i)
-        //     {
-        //         cellularAutomataMap.DoSimulationStep(true);
-        //     }
-        //     for (int i = 0; i < 3; ++i)
-        //     {
-        //         cellularAutomataMap.DoSimulationStep(false);
-        //     }
-        // }
-        // if (IsKeyPressed(KEY_F11))
-        // {
-        //     cellularAutomataMap.DoSimulationStep(true);
-        // }
-        // if (IsKeyPressed(KEY_F12))
-        // {
-        //     cellularAutomataMap.DoSimulationStep(false);
-        // }
 
         if (!randomWalkMap.IsFinished() && started)
             randomWalkMap.GenerateOneStep();
@@ -94,13 +53,12 @@ int main()
         ClearBackground(DARKBLUE);
 
             BeginMode3D(camera);
+                if (started || randomWalkMap.IsFinished())
                     randomWalkMap.DrawCellMap3D();
-                    randomWalkMap.DrawWalkers3D();
-
-                    //DrawGrid(1300, 1.0f);
+                randomWalkMap.DrawWalkers3D();
             EndMode3D();
 
-            //cellularAutomataMap.DrawCellMap();
+            // 2D Draw
             // randomWalkMap.DrawCellMap();
             // randomWalkMap.DrawWalkers();
 

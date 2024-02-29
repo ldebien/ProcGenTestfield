@@ -54,8 +54,16 @@ public:
 
 private:
     CellProperties *properties {};
+    Mesh mesh {0};
+    Model model {0};
+    Mesh *cellMesh {};
     Color color {};
 
-    void SetType(ECellType p_type)                           { properties->type = p_type; }
+    void SetType(ECellType p_type);
     void SetCornerPosY(ECellVertice p_corner, float p_posY);
+    void GenerateMesh();
+    void GenerateFloorMesh();
+    void GenerateFloorMesh2();
+    void UpdateMesh();
+    void UpdateFloorMeshHeight();
 };
