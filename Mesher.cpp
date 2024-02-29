@@ -5,19 +5,21 @@
 
 void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, float p_height)
 {
-    p_mesh->triangleCount = 2 * (p_definition * 2);
+    p_mesh->triangleCount = 2 * (p_definition * p_definition);
     p_mesh->vertexCount = p_mesh->triangleCount*3;
     p_mesh->vertices = (float *)MemAlloc(p_mesh->vertexCount*3*sizeof(float));                    // 3 vertices, 3 coordinates each (x, y, z)
     p_mesh->texcoords = (float *)MemAlloc(p_mesh->vertexCount*2*sizeof(float));                   // 3 vertices, 2 coordinates each (x, y)
     p_mesh->normals = (float *)MemAlloc(p_mesh->vertexCount*3*sizeof(float));                     // 3 vertices, 3 coordinates each (x, y, z)
     p_mesh->colors = (unsigned char *)MemAlloc(p_mesh->vertexCount*4*sizeof(unsigned char));      // 3 vertices, 4 color components (r, g, b, a)
 
+    std::cout << "Generating mesh with " << p_mesh->vertexCount << " vertices" << std::endl;
+
     Vector3 subdivSize = { p_width / p_definition, 0.0f, p_height / p_definition };
     Vector3 offset = { p_width * -0.5f, 0.0f, p_height * -0.5f }; // half size offset to have pivot in mesh center (which looks like a quad facing up with y = 0)
 
     Vector3 subdivPosMin { 0 }; 
     Vector3 subdivPosMax { 0 };
-    int verticePerSubdiv = p_mesh->vertexCount / (p_definition * 2);
+    int verticeCoordPerSubdiv = p_mesh->vertexCount * 3 / (p_definition * p_definition);
     Color subdivColor = RAYWHITE;
 
     int vertexIdx = 0; 
@@ -32,7 +34,7 @@ void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, fl
 
             GenerateFloorMeshSubdivision(p_mesh, subdivPosMin, subdivPosMax, subdivSize, vertexIdx, subdivColor);
 
-            vertexIdx += verticePerSubdiv;
+            vertexIdx += verticeCoordPerSubdiv;
         }
     }
 }
@@ -40,6 +42,8 @@ void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, fl
 void Mesher::GenerateFloorMeshSubdivision(Mesh* p_mesh, Vector3 p_minPos, Vector3 p_maxPos, Vector3 p_size, int p_vertexStartIdx, Color p_color)
 {
     std::cout << "Start index " << p_vertexStartIdx << " | min: " << p_minPos.x << ";" << p_minPos.z << " & max: " << p_maxPos.x << ";" << p_maxPos.z <<  std::endl;
+
+    // Commented are the data that should be in each vertex
 
     // Top Left Vertex
     p_mesh->vertices[p_vertexStartIdx+0] = p_minPos.x;
@@ -167,5 +171,15 @@ void Mesher::GenerateFloorMeshSubdivision(Mesh* p_mesh, Vector3 p_minPos, Vector
         p_mesh->colors[p_vertexStartIdx+i+1] = p_color.g;
         p_mesh->colors[p_vertexStartIdx+i+2] = p_color.b;
         p_mesh->colors[p_vertexStartIdx+i+3] = p_color.a;
+    }
+
+    std::cout << "Subdiv " << p_vertexStartIdx / 18 << " summary:" << std::endl;
+    for (int i = 0; i < 18; i+=3)
+    {
+        std::cout << "\t- v" << i/3 << ": [" << 
+            p_mesh->vertices[p_vertexStartIdx+i+0] << " ; " <<
+            p_mesh->vertices[p_vertexStartIdx+i+1] << " ; " <<
+            p_mesh->vertices[p_vertexStartIdx+i+2] <<
+            "]" << std::endl;
     }
 }
