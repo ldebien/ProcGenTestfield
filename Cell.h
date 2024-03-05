@@ -63,7 +63,6 @@ private:
     void SetCornerPosY(ECellVertice p_corner, float p_posY);
     void GenerateMesh();
     void GenerateFloorMesh();
-    void GenerateFloorMesh2();
     void UpdateMesh();
     void UpdateFloorMeshHeight();
 };

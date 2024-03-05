@@ -31,6 +31,8 @@ RandomWalkCaveGenerator::~RandomWalkCaveGenerator()
 
 void RandomWalkCaveGenerator::Init()
 {
+    std::cout << "Init Generator" << std::endl;
+    
     floorPerlinNoiseImage = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 0, 0, 6.0f);
 
     floorCells = new Cell*[MAP_WIDTH] {};

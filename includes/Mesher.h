@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <vector>
 
 class Mesher
 {
@@ -9,5 +10,7 @@ public:
 
     static void GenerateFloorMesh(Mesh* p_mesh, int p_subdivisions, float p_width, float p_height);
 private:
-    static void GenerateFloorMeshSubdivision(Mesh* p_mesh, Vector3 p_minPos, Vector3 p_maxPos, Vector3 p_size, int p_vertexStartIdx, Color p_color);
+    static void GenerateFloorMeshSubdivisionVertices(Mesh* p_mesh, Vector3 p_minPos, Vector3 p_maxPos, int p_startIdx);
+    static void GenerateFloorMeshSubdivisionTexCoords(Mesh* p_mesh, Vector3 p_size, int p_startIdx);
+    static void GenerateFloorMeshSubdivisionColor(Mesh* p_mesh, Color p_color, int p_startIdx);
 };
