@@ -74,7 +74,7 @@ void Cell::GenerateMesh()
 
 void Cell::GenerateFloorMesh()
 {
-    Mesher::GenerateFloorMesh(&mesh, 2, 1.0f, 1.0f);
+    Mesher::GenerateFloorMesh(&mesh, 2, 1.0f, 1.0f, color);
     UploadMesh(&mesh, false);
 
     model = LoadModelFromMesh(mesh);

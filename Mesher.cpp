@@ -3,7 +3,7 @@
 #include "raymath.h"
 #include <iostream>
 
-void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, float p_height)
+void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, float p_height, Color p_color)
 {
     int subdivNb = p_definition * p_definition;
 
@@ -22,7 +22,6 @@ void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, fl
     int verticeCoordPerSubdiv = p_mesh->vertexCount * 3 / subdivNb;
     int texCoordPerSubdiv = p_mesh->vertexCount * 2 / subdivNb;
     int colorCompPerSubdiv = p_mesh->vertexCount * 4 / subdivNb;
-    Color subdivColor = RAYWHITE;
 
     int vertexIdx = 0;
     int texCoordIdx = 0;
@@ -34,11 +33,10 @@ void Mesher::GenerateFloorMesh(Mesh* p_mesh, int p_definition, float p_width, fl
         {
             subdivPosMin.z = z * subdivSize.z + offset.z;
             subdivPosMax = Vector3Add(subdivPosMin, subdivSize);
-            subdivColor = x % 2 == z % 2 ? RAYWHITE : GRAY;
 
             GenerateFloorMeshSubdivisionVertices(p_mesh, subdivPosMin, subdivPosMax, vertexIdx);
             GenerateFloorMeshSubdivisionTexCoords(p_mesh, subdivSize, texCoordIdx);
-            GenerateFloorMeshSubdivisionColor(p_mesh, subdivColor, colorCompIdx);
+            GenerateFloorMeshSubdivisionColor(p_mesh, p_color, colorCompIdx);
 
             vertexIdx += verticeCoordPerSubdiv;
             texCoordIdx += texCoordPerSubdiv;
