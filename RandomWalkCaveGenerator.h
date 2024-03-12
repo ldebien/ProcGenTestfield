@@ -31,6 +31,7 @@ public:
     void PrepareMapGeneration();
     void GenerateOneStep();
     void FullyGenerateMap();
+    Vector3 GetWalkerPos();
 
     void DrawCellMap();
     void DrawWalkers();

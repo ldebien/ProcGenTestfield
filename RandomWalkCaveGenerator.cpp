@@ -43,7 +43,7 @@ void RandomWalkCaveGenerator::Init()
         {
             Color pixelColor = GetImageColor(floorPerlinNoiseImage, x, y);
             //Vector3 pos { x + 0.5f, pixelColor.r / 32, y + 0.5f };
-            Vector3 pos { x, pixelColor.r / 32, y };
+            Vector3 pos { x, pixelColor.r / 32.0f, y };
             floorCells[x][y].Init(pos);
         }
     }
@@ -171,6 +171,14 @@ void RandomWalkCaveGenerator::GenerateOneStep()
     PostStepCheck();
 }
 
+Vector3 RandomWalkCaveGenerator::GetWalkerPos()
+{
+    if (m_walkers.size() <= 0)
+        return Vector3Zero();
+    
+    return Vector3 { (float)m_walkers[0]->PosX, 0.0f, (float)m_walkers[0]->PosY };
+}
+
 void RandomWalkCaveGenerator::SpawnWalker()
 {
     // Random points at least 30% distance from map borders
@@ -183,6 +191,7 @@ void RandomWalkCaveGenerator::SpawnWalker()
     m_walkers.push_back(newWalker);
 
     floorCells[randomX][randomY].SetFloorType();
+    floorCells[randomX][randomY].SetColor(GREEN);
 }
 
 void RandomWalkCaveGenerator::PostStepCheck()

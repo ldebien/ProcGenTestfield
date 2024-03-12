@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 
 #include "raylib.h"
 
@@ -13,7 +14,8 @@ enum ECellVertice
     Left        = 4,
     BotLeft     = 5,
     Bot         = 6,
-    BotRight    = 7
+    BotRight    = 7,
+    Center      = 8
 };
 
 enum ECellType
@@ -28,6 +30,7 @@ struct CellProperties
     ECellType type { ECellType::Empty };
     Vector3 centerPos {};
     std::map<ECellVertice, Vector3> cornerPos {};
+    std::map<ECellVertice, Vector3> vertices {};
 };
 
 class Cell
@@ -48,6 +51,7 @@ public:
 
     void Init(Vector3 p_pos);
     void SetCornersPosY(std::map<ECellVertice, float> p_cornerPos);
+    const std::vector<int> GetVertexIndex(ECellVertice p_vertex); 
 
     const void Draw3D(Vector3 p_offset);
     const void Draw2D(Vector2 p_offset, int p_cellWidth, int p_cellHeight);
@@ -65,4 +69,5 @@ private:
     void GenerateFloorMesh();
     void UpdateMesh();
     void UpdateFloorMeshHeight();
+    
 };
