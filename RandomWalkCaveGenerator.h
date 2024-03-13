@@ -44,9 +44,11 @@ private:
     void GenerateFloor();
     void SpawnWalker();
     void PostStepCheck();
+    void SetupNeighbours();
+    void AddFloorNeighbour(Cell* p_cell, EDirection p_neighbourDir, Cell* p_neighbour);
     void OptimizeFloorCells();
     const bool HasFloorNeighbours(const int x, const int y);
-    const std::map<ECellVertice, float> GetNeighboursPosY(const int x, const int y);
+    const std::map<EDirection, float> GetNeighboursPosY(const int x, const int y);
 
     const int MAP_WIDTH {128};
     const int MAP_HEIGHT {72};

@@ -218,7 +218,61 @@ void RandomWalkCaveGenerator::PostStepCheck()
     if (finished)
     {
         OptimizeFloorCells();
+        SetupNeighbours();
     }
+}
+
+void RandomWalkCaveGenerator::SetupNeighbours()
+{
+    for (int x = 0; x < MAP_WIDTH; ++x)
+    {
+        for (int y = 0; y < MAP_HEIGHT; ++y)
+        {
+            Cell* curCell = &floorCells[x][y];
+            if (curCell->GetCellType() != ECellType::Floor)
+                continue;
+
+            bool isMinX = x == 0;
+            bool isMaxX = x == MAP_WIDTH - 1;
+            bool isMinY = y == 0;
+            bool isMaxY = y == MAP_HEIGHT - 1;
+            
+            if (!isMinX)
+            {
+                AddFloorNeighbour(curCell, EDirection::Left, &floorCells[x-1][y]);
+                
+                if (!isMinY)
+                {
+                    AddFloorNeighbour(curCell, EDirection::TopLeft, &floorCells[x-1][y-1]);
+                    
+                    if (!isMaxY)
+                        AddFloorNeighbour(curCell, EDirection::BotLeft, &floorCells[x-1][y+1]);
+                }
+            }
+
+            if (!isMinY)
+                AddFloorNeighbour(curCell, EDirection::Top, &floorCells[x][y-1]);
+
+            if (!isMaxY)
+                AddFloorNeighbour(curCell, EDirection::Bot, &floorCells[x][y+1]);
+
+            if (!isMaxX)
+            {
+                AddFloorNeighbour(curCell, EDirection::Right, &floorCells[x+1][y]);
+                
+                if (!isMinY)
+                    AddFloorNeighbour(curCell, EDirection::TopRight, &floorCells[x+1][y-1]);
+                if (!isMaxY)
+                    AddFloorNeighbour(curCell, EDirection::BotRight, &floorCells[x+1][y+1]);
+            }
+        }
+    }
+}
+
+void RandomWalkCaveGenerator::AddFloorNeighbour(Cell* p_cell, EDirection p_neighbourDir, Cell* p_neighbour)
+{
+    if (p_neighbour->GetCellType() == ECellType::Floor)
+        p_cell->SetNeighbour(EDirection::Right, p_neighbour);
 }
 
 /// @brief Optimize the number of cells
@@ -272,17 +326,17 @@ void RandomWalkCaveGenerator::OptimizeFloorCells()
                 int centerPosY = floorCells[x][y].GetPos().y;
                 auto neighboursPosY = GetNeighboursPosY(x, y);
 
-                std::map<ECellVertice, float> newCornerPosY {};
+                std::map<EDirection, float> newCornerPosY {};
 
-                newCornerPosY[ECellVertice::TopRight]   =   (neighboursPosY[ECellVertice::Right]    +   neighboursPosY[ECellVertice::TopRight]    + neighboursPosY[ECellVertice::Top]         + centerPosY) / 4.0f;
-                newCornerPosY[ECellVertice::TopLeft]    =   (neighboursPosY[ECellVertice::Top]      +   neighboursPosY[ECellVertice::TopLeft]     + neighboursPosY[ECellVertice::Left]        + centerPosY) / 4.0f;
-                newCornerPosY[ECellVertice::BotLeft]    =   (neighboursPosY[ECellVertice::Left]     +   neighboursPosY[ECellVertice::BotLeft]     + neighboursPosY[ECellVertice::Bot]         + centerPosY) / 4.0f;
-                newCornerPosY[ECellVertice::BotRight]   =   (neighboursPosY[ECellVertice::Bot]      +   neighboursPosY[ECellVertice::BotRight]    + neighboursPosY[ECellVertice::Right]       + centerPosY) / 4.0f;
+                newCornerPosY[EDirection::TopRight]   =   (neighboursPosY[EDirection::Right]    +   neighboursPosY[EDirection::TopRight]    + neighboursPosY[EDirection::Top]         + centerPosY) / 4.0f;
+                newCornerPosY[EDirection::TopLeft]    =   (neighboursPosY[EDirection::Top]      +   neighboursPosY[EDirection::TopLeft]     + neighboursPosY[EDirection::Left]        + centerPosY) / 4.0f;
+                newCornerPosY[EDirection::BotLeft]    =   (neighboursPosY[EDirection::Left]     +   neighboursPosY[EDirection::BotLeft]     + neighboursPosY[EDirection::Bot]         + centerPosY) / 4.0f;
+                newCornerPosY[EDirection::BotRight]   =   (neighboursPosY[EDirection::Bot]      +   neighboursPosY[EDirection::BotRight]    + neighboursPosY[EDirection::Right]       + centerPosY) / 4.0f;
 
-                newCornerPosY[ECellVertice::Right]      =   (newCornerPosY[ECellVertice::TopRight]  +   newCornerPosY[ECellVertice::BotRight])  /   2.0f;
-                newCornerPosY[ECellVertice::Top]        =   (newCornerPosY[ECellVertice::TopRight]  +   newCornerPosY[ECellVertice::TopLeft])   /   2.0f;
-                newCornerPosY[ECellVertice::Left]       =   (newCornerPosY[ECellVertice::TopLeft]   +   newCornerPosY[ECellVertice::BotLeft])   /   2.0f;
-                newCornerPosY[ECellVertice::Bot]        =   (newCornerPosY[ECellVertice::BotLeft]   +   newCornerPosY[ECellVertice::BotRight])  /   2.0f;
+                newCornerPosY[EDirection::Right]      =   (newCornerPosY[EDirection::TopRight]  +   newCornerPosY[EDirection::BotRight])  /   2.0f;
+                newCornerPosY[EDirection::Top]        =   (newCornerPosY[EDirection::TopRight]  +   newCornerPosY[EDirection::TopLeft])   /   2.0f;
+                newCornerPosY[EDirection::Left]       =   (newCornerPosY[EDirection::TopLeft]   +   newCornerPosY[EDirection::BotLeft])   /   2.0f;
+                newCornerPosY[EDirection::Bot]        =   (newCornerPosY[EDirection::BotLeft]   +   newCornerPosY[EDirection::BotRight])  /   2.0f;
 
                 floorCells[x][y].SetCornersPosY(newCornerPosY);
             }
@@ -340,10 +394,10 @@ const bool RandomWalkCaveGenerator::HasFloorNeighbours(const int x, const int y)
     return false;
 }
 
-const std::map<ECellVertice, float> RandomWalkCaveGenerator::GetNeighboursPosY(const int x, const int y)
+const std::map<EDirection, float> RandomWalkCaveGenerator::GetNeighboursPosY(const int x, const int y)
 {
-    std::map<ECellVertice, float> posY {};
-    ECellVertice curVertex {};
+    std::map<EDirection, float> posY {};
+    EDirection curVertex {};
 
     for(int i = -1; i < 2; ++i)
     {
@@ -357,14 +411,14 @@ const std::map<ECellVertice, float> RandomWalkCaveGenerator::GetNeighboursPosY(c
                 continue;
 			}
 
-            if (j == -1 && i == -1)         curVertex = ECellVertice::TopLeft;
-            else if (j == -1 && i == 0)     curVertex = ECellVertice::Top;
-            else if (j == -1 && i == 1)     curVertex = ECellVertice::TopRight;
-            else if (j == 0 && i == -1)     curVertex = ECellVertice::Left;
-            else if (j == 0 && i == 1)      curVertex = ECellVertice::Right;
-            else if (j == 1 && i == -1)     curVertex = ECellVertice::BotLeft;
-            else if (j == 1 && i == 0)      curVertex = ECellVertice::Bot;
-            else if (j == 1 && i == 1)      curVertex = ECellVertice::BotRight;
+            if (j == -1 && i == -1)         curVertex = EDirection::TopLeft;
+            else if (j == -1 && i == 0)     curVertex = EDirection::Top;
+            else if (j == -1 && i == 1)     curVertex = EDirection::TopRight;
+            else if (j == 0 && i == -1)     curVertex = EDirection::Left;
+            else if (j == 0 && i == 1)      curVertex = EDirection::Right;
+            else if (j == 1 && i == -1)     curVertex = EDirection::BotLeft;
+            else if (j == 1 && i == 0)      curVertex = EDirection::Bot;
+            else if (j == 1 && i == 1)      curVertex = EDirection::BotRight;
 
             posY[curVertex] = floorCells[neighbourX][neighbourY].GetPos().y;
 		}

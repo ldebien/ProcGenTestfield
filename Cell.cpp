@@ -12,14 +12,14 @@ Cell::Cell()
         ECellType::Empty,
         Vector3Zero(),
         {
-            {ECellVertice::Right,       {0.5f, 0.0f, 0.0f}},
-            {ECellVertice::TopRight,    {0.5f, 0.0f, -0.5f}},
-            {ECellVertice::Top,         {0.0f, 0.0f, -0.5f}},
-            {ECellVertice::TopLeft,     {-0.5f, 0.0f, -0.5f}},
-            {ECellVertice::Left,        {-0.5f, 0.0f, 0.0f}},
-            {ECellVertice::BotLeft,     {-0.5f, 0.0f, 0.5f}},
-            {ECellVertice::Bot,         {0.0f, 0.0f, 0.5f}},
-            {ECellVertice::BotRight,    {0.5f, 0.0f, 0.5f}}
+            {EDirection::Right,       {0.5f, 0.0f, 0.0f}},
+            {EDirection::TopRight,    {0.5f, 0.0f, -0.5f}},
+            {EDirection::Top,         {0.0f, 0.0f, -0.5f}},
+            {EDirection::TopLeft,     {-0.5f, 0.0f, -0.5f}},
+            {EDirection::Left,        {-0.5f, 0.0f, 0.0f}},
+            {EDirection::BotLeft,     {-0.5f, 0.0f, 0.5f}},
+            {EDirection::Bot,         {0.0f, 0.0f, 0.5f}},
+            {EDirection::BotRight,    {0.5f, 0.0f, 0.5f}}
         }
     };
 }
@@ -35,7 +35,7 @@ void Cell::Init(Vector3 p_pos)
     color = BLANK;
 }
 
-void Cell::SetCornersPosY(std::map<ECellVertice, float> p_cornerPosY)
+void Cell::SetCornersPosY(std::map<EDirection, float> p_cornerPosY)
 {
     return;
 
@@ -50,7 +50,7 @@ void Cell::SetCornersPosY(std::map<ECellVertice, float> p_cornerPosY)
 
     for (int it = 0; it < p_cornerPosY.size(); ++it)
     {
-        auto cellVertice = static_cast<ECellVertice>(it);
+        auto cellVertice = static_cast<EDirection>(it);
         auto vertexIndexes = GetVertexIndex(cellVertice);
         for (int index = 0; index < vertexIndexes.size(); ++index)
         {
@@ -76,7 +76,7 @@ void Cell::SetType(ECellType p_newType)
     GenerateMesh();
 }
 
-void Cell::SetCornerPosY(ECellVertice p_corner, float p_posY)
+void Cell::SetCornerPosY(EDirection p_corner, float p_posY)
 {
     properties->cornerPos[p_corner].y = p_posY;
 }
@@ -131,18 +131,18 @@ void Cell::UpdateFloorMeshHeight()
     // int vertexCount {12};
 
     // Vector3 *vertices = new Vector3[vertexCount] {};
-    // *vertices = properties->cornerPos[ECellVertice::TopLeft];
-    // *(vertices+1) = properties->cornerPos[ECellVertice::Left];
-    // *(vertices+2) = properties->cornerPos[ECellVertice::Top];
+    // *vertices = properties->cornerPos[EDirection::TopLeft];
+    // *(vertices+1) = properties->cornerPos[EDirection::Left];
+    // *(vertices+2) = properties->cornerPos[EDirection::Top];
     // *(vertices+3) = correctedCenter;
-    // *(vertices+4) = properties->cornerPos[ECellVertice::TopRight];
-    // *(vertices+5) = properties->cornerPos[ECellVertice::Right];
-    // *(vertices+6) = properties->cornerPos[ECellVertice::Left]; 
-    // *(vertices+7) = properties->cornerPos[ECellVertice::BotLeft];
+    // *(vertices+4) = properties->cornerPos[EDirection::TopRight];
+    // *(vertices+5) = properties->cornerPos[EDirection::Right];
+    // *(vertices+6) = properties->cornerPos[EDirection::Left]; 
+    // *(vertices+7) = properties->cornerPos[EDirection::BotLeft];
     // *(vertices+8) = correctedCenter;
-    // *(vertices+9) = properties->cornerPos[ECellVertice::Bot];
-    // *(vertices+10) = properties->cornerPos[ECellVertice::Right];
-    // *(vertices+11) = properties->cornerPos[ECellVertice::BotRight];
+    // *(vertices+9) = properties->cornerPos[EDirection::Bot];
+    // *(vertices+10) = properties->cornerPos[EDirection::Right];
+    // *(vertices+11) = properties->cornerPos[EDirection::BotRight];
 
     // float *floatVertices = new float[3] {};
     // for (int i = 0; i < vertexCount * 3; i+=3)
@@ -155,7 +155,7 @@ void Cell::UpdateFloorMeshHeight()
     //UpdateMeshBuffer(*cellMesh, 0, floatVertices, vertexCount * 3, 0);
 }
 
-const std::vector<int> Cell::GetVertexIndex(ECellVertice p_vertex)
+const std::vector<int> Cell::GetVertexIndex(EDirection p_vertex)
 {
     /*
     0- top left
@@ -171,41 +171,41 @@ const std::vector<int> Cell::GetVertexIndex(ECellVertice p_vertex)
 
     switch (p_vertex)
     {
-        case ECellVertice::TopLeft:
+        case EDirection::TopLeft:
             indexes.push_back(0); // OK
             break;
-        case ECellVertice::Left:
+        case EDirection::Left:
             indexes.push_back(1); // OK
             indexes.push_back(4); // OK
             indexes.push_back(verticesPerSubdiv * 2); // OK
             break;
-        case ECellVertice::Top:
+        case EDirection::Top:
             indexes.push_back(2); // OK
             indexes.push_back(3); // OK
             indexes.push_back(verticesPerSubdiv); // OK
             break;
-        case ECellVertice::TopRight:
+        case EDirection::TopRight:
             indexes.push_back(verticesPerSubdiv + 2); // OK
             indexes.push_back(verticesPerSubdiv + 3); // OK
             break;
-        case ECellVertice::Right:
+        case EDirection::Right:
             indexes.push_back(verticesPerSubdiv + 5);  // OK
             indexes.push_back(verticesPerSubdiv * 3 + 2); // OK
             indexes.push_back(verticesPerSubdiv * 3 + 3); // OK
             break;
-        case ECellVertice::BotLeft:
+        case EDirection::BotLeft:
             indexes.push_back(verticesPerSubdiv * 2 + 1); // OK
             indexes.push_back(verticesPerSubdiv * 2 + 4); // OK
             break;
-        case ECellVertice::Bot:
+        case EDirection::Bot:
             indexes.push_back(verticesPerSubdiv * 2 + 5); // OK
             indexes.push_back(verticesPerSubdiv * 3 + 1); // OK
             indexes.push_back(verticesPerSubdiv * 3 + 4); // OK
             break;
-        case ECellVertice::BotRight:
+        case EDirection::BotRight:
             indexes.push_back(verticesPerSubdiv * 3 + 5); // OK
             break;
-        case ECellVertice::Center:
+        case EDirection::Center:
             indexes.push_back(5); // OK
             indexes.push_back(verticesPerSubdiv + 1); // OK
             indexes.push_back(verticesPerSubdiv + 4); // OK
